@@ -135,7 +135,7 @@ html, body {
 }
 .ctrl-main { width: 72px; height: 72px; font-size: 26px; background: #3ED598; color: #0B0D10; }
 
-/* ===== Анимации категорий (на частях фигуры) ===== */
+/* ===== Анимации: база (переиспользуемые движения) ===== */
 @keyframes swingUp { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(175deg);} }
 @keyframes hingeLean { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(-35deg);} }
 @keyframes squatDip { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(14px);} }
@@ -150,21 +150,94 @@ html, body {
 @keyframes stretchPulse { 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.05);} }
 @keyframes stretchReach { 0%,100%{ transform: rotate(60deg);} 50%{ transform: rotate(120deg);} }
 
-.anim-press .armL, .anim-press .armR { animation: swingUp 1s ease-in-out infinite; }
-.anim-hinge .upperBody { animation: hingeLean 1.1s ease-in-out infinite; }
-.anim-squat #figAll { animation: squatDip 1.1s ease-in-out infinite; }
-.anim-squat .legL { animation: legOutL 1.1s ease-in-out infinite; }
-.anim-squat .legR { animation: legOutR 1.1s ease-in-out infinite; }
-.anim-row .armL, .anim-row .armR { animation: rowPull 1s ease-in-out infinite; }
-.anim-curl .armR { animation: curlUp .9s ease-in-out infinite; }
-.anim-core .upperBody { animation: coreTwist .9s ease-in-out infinite; }
-.anim-lunge .legL { animation: lungeL 1.1s ease-in-out infinite; }
-.anim-lunge .legR { animation: lungeR 1.1s ease-in-out infinite; }
-.anim-mobility .armL, .anim-mobility .armR { animation: mobilitySpin 1.8s linear infinite; }
-.anim-stretch #figAll { animation: stretchPulse 2.4s ease-in-out infinite; }
-.anim-stretch .armR { animation: stretchReach 2.4s ease-in-out infinite; }
-.anim-power #figAll { animation: squatDip .7s ease-in-out infinite; }
-.anim-power .armL, .anim-power .armR { animation: swingUp .7s ease-in-out infinite; }
+/* ===== Анимации: дополнительные движения для конкретных упражнений ===== */
+@keyframes neckWobble { 0%,100%{ transform: rotate(-6deg);} 50%{ transform: rotate(6deg);} }
+@keyframes hipCircle { 0%{ transform: translate(0,0);} 25%{ transform: translate(4px,-2px);} 50%{ transform: translate(0,2px);} 75%{ transform: translate(-4px,-2px);} 100%{ transform: translate(0,0);} }
+@keyframes legSwingFB { 0%,100%{ transform: rotate(-35deg);} 50%{ transform: rotate(35deg);} }
+@keyframes torsoTwistWide { 0%,100%{ transform: rotate(-20deg);} 50%{ transform: rotate(20deg);} }
+@keyframes floorPress { 0%,100%{ transform: rotate(-10deg);} 50%{ transform: rotate(90deg);} }
+@keyframes torsoSwaySmall { 0%,100%{ transform: rotate(-5deg);} 50%{ transform: rotate(5deg);} }
+@keyframes armBendA { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(70deg);} }
+@keyframes figDipSmall { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(6px);} }
+@keyframes skullCrush { 0%,100%{ transform: rotate(160deg);} 50%{ transform: rotate(90deg);} }
+@keyframes swingArmsKB { 0%,100%{ transform: rotate(-20deg);} 50%{ transform: rotate(70deg);} }
+@keyframes bentHoldStatic { 0%,100%{ transform: rotate(-42deg);} 50%{ transform: rotate(-38deg);} }
+@keyframes armHoldNarrow { 0%,100%{ transform: rotate(-5deg);} 50%{ transform: rotate(5deg);} }
+@keyframes legRaiseBack { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(-30deg);} }
+@keyframes diagonalChop { 0%,100%{ transform: rotate(150deg);} 50%{ transform: rotate(10deg);} }
+@keyframes cleanRack { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(-100deg);} }
+@keyframes dragSide { 0%,100%{ transform: rotate(-20deg);} 50%{ transform: rotate(40deg);} }
+@keyframes quadHold { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(-130deg);} }
+
+/* ===== Разминка ===== */
+.anim-w1 .upperBody { animation: neckWobble .6s ease-in-out infinite; }
+.anim-w2 .armL, .anim-w2 .armR { animation: mobilitySpin 1.8s linear infinite; }
+.anim-w3 .armL { animation: mobilitySpin 1s linear infinite; }
+.anim-w3 .armR { animation: mobilitySpin 1s linear infinite reverse; }
+.anim-w4 .upperBody { animation: torsoTwistWide 1s ease-in-out infinite; }
+.anim-w5 #figAll { animation: hipCircle 1.6s ease-in-out infinite; }
+.anim-w6 .legR { animation: legSwingFB .9s ease-in-out infinite; }
+.anim-w7 #figAll { animation: squatDip 1.1s ease-in-out infinite; }
+.anim-w7 .legL { animation: legOutL 1.1s ease-in-out infinite; }
+.anim-w7 .legR { animation: legOutR 1.1s ease-in-out infinite; }
+.anim-w8 .legL { animation: lungeL 1.1s ease-in-out infinite; }
+.anim-w8 .legR { animation: lungeR 1.1s ease-in-out infinite; }
+.anim-w8 .upperBody { animation: coreTwist 1.1s ease-in-out infinite; }
+
+/* ===== День 1 — плечи и грудь ===== */
+.anim-d1-1 .armR { animation: swingUp 1s ease-in-out infinite; }
+.anim-d1-2 #figAll { animation: squatDip .9s ease-in-out infinite; }
+.anim-d1-2 .armL, .anim-d1-2 .armR { animation: armBendA .9s ease-in-out infinite; }
+.anim-d1-3 .armR { animation: floorPress 1s ease-in-out infinite; }
+.anim-d1-4 .armR { animation: swingUp 1.3s ease-in-out infinite; }
+.anim-d1-4 .upperBody { animation: torsoSwaySmall 1.3s ease-in-out infinite; }
+.anim-d1-5 #figAll { animation: figDipSmall .8s ease-in-out infinite; }
+.anim-d1-5 .armL, .anim-d1-5 .armR { animation: armBendA .8s ease-in-out infinite; }
+.anim-d1-6 .armR { animation: skullCrush 1s ease-in-out infinite; }
+
+/* ===== День 2 — спина и ноги ===== */
+.anim-d2-1 .armL, .anim-d2-1 .armR { animation: swingArmsKB .8s ease-in-out infinite; }
+.anim-d2-1 .upperBody { animation: hingeLean .8s ease-in-out infinite; }
+.anim-d2-2 .upperBody { animation: bentHoldStatic 1.4s ease-in-out infinite; }
+.anim-d2-2 .armR { animation: rowPull 1s ease-in-out infinite; }
+.anim-d2-3 #figAll { animation: squatDip 1.4s ease-in-out infinite; }
+.anim-d2-3 .legL { animation: legOutL 1.4s ease-in-out infinite; }
+.anim-d2-3 .legR { animation: legOutR 1.4s ease-in-out infinite; }
+.anim-d2-3 .armL, .anim-d2-3 .armR { animation: armHoldNarrow 1.4s ease-in-out infinite; }
+.anim-d2-4 .armR { animation: curlUp .9s ease-in-out infinite; }
+.anim-d2-5 .legL { animation: lungeL 1s ease-in-out infinite; }
+.anim-d2-5 .legR { animation: lungeR 1s ease-in-out infinite; }
+.anim-d2-6 .upperBody { animation: hingeLean 1.2s ease-in-out infinite; }
+.anim-d2-6 .legL { animation: legRaiseBack 1.2s ease-in-out infinite; }
+
+/* ===== День 3 — фулбоди и кор ===== */
+.anim-d3-1 .armR { animation: swingUp .6s ease-in-out infinite; }
+.anim-d3-1 #figAll { animation: squatDip .6s ease-in-out infinite; }
+.anim-d3-2 .upperBody { animation: torsoTwistWide .9s ease-in-out infinite; }
+.anim-d3-2 .armR { animation: diagonalChop .9s ease-in-out infinite; }
+.anim-d3-3 .armR { animation: mobilitySpin 1.6s linear infinite; }
+.anim-d3-4 .upperBody, .anim-d3-4 .armL, .anim-d3-4 .armR { animation: torsoTwistWide .8s ease-in-out infinite; }
+.anim-d3-5 .armR { animation: cleanRack .7s ease-in-out infinite; }
+.anim-d3-5 #figAll { animation: squatDip .7s ease-in-out infinite; }
+.anim-d3-6 .armR { animation: dragSide 1s ease-in-out infinite; }
+
+/* ===== Восстановление ===== */
+.anim-r1 .armL { animation: stretchReach 2.4s ease-in-out infinite; }
+.anim-r1 #figAll { animation: stretchPulse 2.4s ease-in-out infinite; }
+.anim-r2 .armR { animation: stretchReach 2.4s ease-in-out infinite; }
+.anim-r2 #figAll { animation: stretchPulse 2.4s ease-in-out infinite; }
+.anim-r3 .armR { animation: stretchReach 2.2s ease-in-out infinite reverse; }
+.anim-r3 #figAll { animation: stretchPulse 2.2s ease-in-out infinite; }
+.anim-r4 .upperBody { animation: hingeLean 2.4s ease-in-out infinite; }
+.anim-r4 #figAll { animation: stretchPulse 2.4s ease-in-out infinite; }
+.anim-r5 .legL { animation: lungeL 2.4s ease-in-out infinite; }
+.anim-r5 .legR { animation: lungeR 2.4s ease-in-out infinite; }
+.anim-r5 #figAll { animation: stretchPulse 2.4s ease-in-out infinite; }
+.anim-r6 .upperBody { animation: hingeLean 2.6s ease-in-out infinite; }
+.anim-r6 #figAll { animation: squatDip 2.6s ease-in-out infinite; }
+.anim-r7 .upperBody { animation: coreTwist 2s ease-in-out infinite; }
+.anim-r8 .legR { animation: quadHold 2.4s ease-in-out infinite; }
+.anim-r8 #figAll { animation: stretchPulse 2.4s ease-in-out infinite; }
 
 /* ===== DONE ===== */
 .done-wrap {
@@ -865,7 +938,7 @@ function renderStep() {
     $('ex-muscle').textContent = step.item.muscle;
     $('ex-instruction').textContent = step.item.instruction;
     $('ex-mistake').textContent = step.item.mistake;
-    $('timer-anim').className = 'timer-anim anim-' + step.item.cat;
+    $('timer-anim').className = 'timer-anim anim-' + step.item.id;
   }
 
   $('player-round').textContent = session.mode === 'workout' ? `${step.round}/${totalRounds()}` : `${session.idx+1}/${session.steps.length}`;
