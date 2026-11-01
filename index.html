@@ -104,16 +104,20 @@ html, body {
   position: absolute; inset: 0; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
 }
-.timer-anim { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 2px; }
 .timer-seconds { font-size: 44px; font-weight: 800; font-variant-numeric: tabular-nums; }
 
-/* ===== Фигура-силуэт ===== */
-.fig-svg { width: 92px; height: 122px; display: block; overflow: visible; }
-.fig-part { stroke: #F4F5F7; stroke-width: 7; stroke-linecap: round; fill: none; }
-.fig-head { fill: #F4F5F7; }
-.fig-kb-ball { fill: #FFB45C; }
-.fig-kb-handle { fill: none; stroke: #FFB45C; stroke-width: 3; }
-.legL, .legR, .armL, .armR, .upperBody { transform-origin: 0 0; }
+/* ===== Фото техники + мини-таймер ===== */
+.photo-stage { position: relative; width: 100%; max-width: 280px; margin: 4px 0 12px; }
+.ex-photo {
+  width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block;
+  border-radius: 24px; background: #15181D; border: 1px solid #23262C;
+}
+.timer-badge {
+  position: absolute; right: -10px; bottom: -10px; width: 84px; height: 84px;
+  background: #0B0D10; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+}
+.timer-badge .timer-ring { position: absolute; inset: 0; width: 84px; height: 84px; }
+.timer-badge .timer-seconds { position: relative; font-size: 22px; }
 
 .ex-name { font-size: 24px; font-weight: 800; text-align: center; margin: 4px 0 2px; }
 .ex-muscle { color: #8A8F98; font-size: 14px; margin-bottom: 14px; }
@@ -134,110 +138,6 @@ html, body {
   border-radius: 50%; font-size: 18px;
 }
 .ctrl-main { width: 72px; height: 72px; font-size: 26px; background: #3ED598; color: #0B0D10; }
-
-/* ===== Анимации: база (переиспользуемые движения) ===== */
-@keyframes swingUp { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(175deg);} }
-@keyframes hingeLean { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(-35deg);} }
-@keyframes squatDip { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(14px);} }
-@keyframes legOutL { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(-8deg);} }
-@keyframes legOutR { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(8deg);} }
-@keyframes rowPull { 0%,100%{ transform: rotate(10deg);} 50%{ transform: rotate(-70deg);} }
-@keyframes curlUp { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(140deg);} }
-@keyframes coreTwist { 0%,100%{ transform: rotate(-12deg);} 50%{ transform: rotate(12deg);} }
-@keyframes lungeL { 0%,100%{ transform: rotate(18deg);} 50%{ transform: rotate(-18deg);} }
-@keyframes lungeR { 0%,100%{ transform: rotate(-18deg);} 50%{ transform: rotate(18deg);} }
-@keyframes mobilitySpin { from{ transform: rotate(0deg);} to{ transform: rotate(360deg);} }
-@keyframes stretchPulse { 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.05);} }
-@keyframes stretchReach { 0%,100%{ transform: rotate(60deg);} 50%{ transform: rotate(120deg);} }
-
-/* ===== Анимации: дополнительные движения для конкретных упражнений ===== */
-@keyframes neckWobble { 0%,100%{ transform: rotate(-6deg);} 50%{ transform: rotate(6deg);} }
-@keyframes hipCircle { 0%{ transform: translate(0,0);} 25%{ transform: translate(4px,-2px);} 50%{ transform: translate(0,2px);} 75%{ transform: translate(-4px,-2px);} 100%{ transform: translate(0,0);} }
-@keyframes legSwingFB { 0%,100%{ transform: rotate(-35deg);} 50%{ transform: rotate(35deg);} }
-@keyframes torsoTwistWide { 0%,100%{ transform: rotate(-20deg);} 50%{ transform: rotate(20deg);} }
-@keyframes floorPress { 0%,100%{ transform: rotate(-10deg);} 50%{ transform: rotate(90deg);} }
-@keyframes torsoSwaySmall { 0%,100%{ transform: rotate(-5deg);} 50%{ transform: rotate(5deg);} }
-@keyframes armBendA { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(70deg);} }
-@keyframes figDipSmall { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(6px);} }
-@keyframes skullCrush { 0%,100%{ transform: rotate(160deg);} 50%{ transform: rotate(90deg);} }
-@keyframes swingArmsKB { 0%,100%{ transform: rotate(-20deg);} 50%{ transform: rotate(70deg);} }
-@keyframes bentHoldStatic { 0%,100%{ transform: rotate(-42deg);} 50%{ transform: rotate(-38deg);} }
-@keyframes armHoldNarrow { 0%,100%{ transform: rotate(-5deg);} 50%{ transform: rotate(5deg);} }
-@keyframes legRaiseBack { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(-30deg);} }
-@keyframes diagonalChop { 0%,100%{ transform: rotate(150deg);} 50%{ transform: rotate(10deg);} }
-@keyframes cleanRack { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(-100deg);} }
-@keyframes dragSide { 0%,100%{ transform: rotate(-20deg);} 50%{ transform: rotate(40deg);} }
-@keyframes quadHold { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(-130deg);} }
-
-/* ===== Разминка ===== */
-.anim-w1 .upperBody { animation: neckWobble .6s ease-in-out infinite; }
-.anim-w2 .armL, .anim-w2 .armR { animation: mobilitySpin 1.8s linear infinite; }
-.anim-w3 .armL { animation: mobilitySpin 1s linear infinite; }
-.anim-w3 .armR { animation: mobilitySpin 1s linear infinite reverse; }
-.anim-w4 .upperBody { animation: torsoTwistWide 1s ease-in-out infinite; }
-.anim-w5 #figAll { animation: hipCircle 1.6s ease-in-out infinite; }
-.anim-w6 .legR { animation: legSwingFB .9s ease-in-out infinite; }
-.anim-w7 #figAll { animation: squatDip 1.1s ease-in-out infinite; }
-.anim-w7 .legL { animation: legOutL 1.1s ease-in-out infinite; }
-.anim-w7 .legR { animation: legOutR 1.1s ease-in-out infinite; }
-.anim-w8 .legL { animation: lungeL 1.1s ease-in-out infinite; }
-.anim-w8 .legR { animation: lungeR 1.1s ease-in-out infinite; }
-.anim-w8 .upperBody { animation: coreTwist 1.1s ease-in-out infinite; }
-
-/* ===== День 1 — плечи и грудь ===== */
-.anim-d1-1 .armR { animation: swingUp 1s ease-in-out infinite; }
-.anim-d1-2 #figAll { animation: squatDip .9s ease-in-out infinite; }
-.anim-d1-2 .armL, .anim-d1-2 .armR { animation: armBendA .9s ease-in-out infinite; }
-.anim-d1-3 .armR { animation: floorPress 1s ease-in-out infinite; }
-.anim-d1-4 .armR { animation: swingUp 1.3s ease-in-out infinite; }
-.anim-d1-4 .upperBody { animation: torsoSwaySmall 1.3s ease-in-out infinite; }
-.anim-d1-5 #figAll { animation: figDipSmall .8s ease-in-out infinite; }
-.anim-d1-5 .armL, .anim-d1-5 .armR { animation: armBendA .8s ease-in-out infinite; }
-.anim-d1-6 .armR { animation: skullCrush 1s ease-in-out infinite; }
-
-/* ===== День 2 — спина и ноги ===== */
-.anim-d2-1 .armL, .anim-d2-1 .armR { animation: swingArmsKB .8s ease-in-out infinite; }
-.anim-d2-1 .upperBody { animation: hingeLean .8s ease-in-out infinite; }
-.anim-d2-2 .upperBody { animation: bentHoldStatic 1.4s ease-in-out infinite; }
-.anim-d2-2 .armR { animation: rowPull 1s ease-in-out infinite; }
-.anim-d2-3 #figAll { animation: squatDip 1.4s ease-in-out infinite; }
-.anim-d2-3 .legL { animation: legOutL 1.4s ease-in-out infinite; }
-.anim-d2-3 .legR { animation: legOutR 1.4s ease-in-out infinite; }
-.anim-d2-3 .armL, .anim-d2-3 .armR { animation: armHoldNarrow 1.4s ease-in-out infinite; }
-.anim-d2-4 .armR { animation: curlUp .9s ease-in-out infinite; }
-.anim-d2-5 .legL { animation: lungeL 1s ease-in-out infinite; }
-.anim-d2-5 .legR { animation: lungeR 1s ease-in-out infinite; }
-.anim-d2-6 .upperBody { animation: hingeLean 1.2s ease-in-out infinite; }
-.anim-d2-6 .legL { animation: legRaiseBack 1.2s ease-in-out infinite; }
-
-/* ===== День 3 — фулбоди и кор ===== */
-.anim-d3-1 .armR { animation: swingUp .6s ease-in-out infinite; }
-.anim-d3-1 #figAll { animation: squatDip .6s ease-in-out infinite; }
-.anim-d3-2 .upperBody { animation: torsoTwistWide .9s ease-in-out infinite; }
-.anim-d3-2 .armR { animation: diagonalChop .9s ease-in-out infinite; }
-.anim-d3-3 .armR { animation: mobilitySpin 1.6s linear infinite; }
-.anim-d3-4 .upperBody, .anim-d3-4 .armL, .anim-d3-4 .armR { animation: torsoTwistWide .8s ease-in-out infinite; }
-.anim-d3-5 .armR { animation: cleanRack .7s ease-in-out infinite; }
-.anim-d3-5 #figAll { animation: squatDip .7s ease-in-out infinite; }
-.anim-d3-6 .armR { animation: dragSide 1s ease-in-out infinite; }
-
-/* ===== Восстановление ===== */
-.anim-r1 .armL { animation: stretchReach 2.4s ease-in-out infinite; }
-.anim-r1 #figAll { animation: stretchPulse 2.4s ease-in-out infinite; }
-.anim-r2 .armR { animation: stretchReach 2.4s ease-in-out infinite; }
-.anim-r2 #figAll { animation: stretchPulse 2.4s ease-in-out infinite; }
-.anim-r3 .armR { animation: stretchReach 2.2s ease-in-out infinite reverse; }
-.anim-r3 #figAll { animation: stretchPulse 2.2s ease-in-out infinite; }
-.anim-r4 .upperBody { animation: hingeLean 2.4s ease-in-out infinite; }
-.anim-r4 #figAll { animation: stretchPulse 2.4s ease-in-out infinite; }
-.anim-r5 .legL { animation: lungeL 2.4s ease-in-out infinite; }
-.anim-r5 .legR { animation: lungeR 2.4s ease-in-out infinite; }
-.anim-r5 #figAll { animation: stretchPulse 2.4s ease-in-out infinite; }
-.anim-r6 .upperBody { animation: hingeLean 2.6s ease-in-out infinite; }
-.anim-r6 #figAll { animation: squatDip 2.6s ease-in-out infinite; }
-.anim-r7 .upperBody { animation: coreTwist 2s ease-in-out infinite; }
-.anim-r8 .legR { animation: quadHold 2.4s ease-in-out infinite; }
-.anim-r8 #figAll { animation: stretchPulse 2.4s ease-in-out infinite; }
 
 /* ===== DONE ===== */
 .done-wrap {
@@ -364,36 +264,13 @@ html, body {
 
     <div class="player-body">
       <div class="phase-badge" id="phase-badge">РАБОТА</div>
-      <div class="timer-wrap">
-        <svg class="timer-ring" viewBox="0 0 220 220">
-          <circle class="ring-bg" cx="110" cy="110" r="100"></circle>
-          <circle class="ring-fg" id="ring-fg" cx="110" cy="110" r="100"></circle>
-        </svg>
-        <div class="timer-center">
-          <div class="timer-anim" id="timer-anim">
-            <svg class="fig-svg" viewBox="0 0 100 150" aria-hidden="true">
-              <g id="figAll">
-                <g transform="translate(50,82)">
-                  <g class="legL"><line class="fig-part" x1="0" y1="0" x2="-16" y2="46"/></g>
-                  <g class="legR"><line class="fig-part" x1="0" y1="0" x2="16" y2="46"/></g>
-                  <g class="upperBody">
-                    <circle class="fig-head" cx="0" cy="-58" r="10"/>
-                    <line class="fig-part" x1="0" y1="-48" x2="0" y2="0"/>
-                    <g transform="translate(0,-48)">
-                      <g class="armL"><line class="fig-part" x1="0" y1="0" x2="-22" y2="34"/></g>
-                      <g class="armR">
-                        <line class="fig-part" x1="0" y1="0" x2="22" y2="34"/>
-                        <g transform="translate(22,34)">
-                          <rect class="fig-kb-handle" x="-4" y="-7" width="8" height="7" rx="3"/>
-                          <circle class="fig-kb-ball" cx="0" cy="4" r="8"/>
-                        </g>
-                      </g>
-                    </g>
-                  </g>
-                </g>
-              </g>
-            </svg>
-          </div>
+      <div class="photo-stage">
+        <img class="ex-photo" id="ex-photo" src="" alt="Техника выполнения">
+        <div class="timer-badge">
+          <svg class="timer-ring" viewBox="0 0 220 220">
+            <circle class="ring-bg" cx="110" cy="110" r="100"></circle>
+            <circle class="ring-fg" id="ring-fg" cx="110" cy="110" r="100"></circle>
+          </svg>
           <div class="timer-seconds" id="timer-seconds">30</div>
         </div>
       </div>
@@ -932,13 +809,13 @@ function renderStep() {
     $('ex-muscle').textContent = 'Отдышись, попей воды';
     $('ex-instruction').textContent = step.roundBreak ? 'Большой перерыв между кругами.' : 'Короткая пауза перед следующим упражнением.';
     $('ex-mistake').textContent = 'Дыши ровно, встряхни руки.';
-    $('timer-anim').className = 'timer-anim';
+    $('ex-photo').src = display ? `img/${display.id}.jpg` : '';
   } else {
     $('ex-name').textContent = step.item.name;
     $('ex-muscle').textContent = step.item.muscle;
     $('ex-instruction').textContent = step.item.instruction;
     $('ex-mistake').textContent = step.item.mistake;
-    $('timer-anim').className = 'timer-anim anim-' + step.item.id;
+    $('ex-photo').src = `img/${step.item.id}.jpg`;
   }
 
   $('player-round').textContent = session.mode === 'workout' ? `${step.round}/${totalRounds()}` : `${session.idx+1}/${session.steps.length}`;
