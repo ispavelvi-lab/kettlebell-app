@@ -20,9 +20,6 @@ html, body {
 }
 #app { height: 100vh; height: 100dvh; position: relative; overflow: hidden; }
 
-.safe-top { padding-top: env(safe-area-inset-top); }
-.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-
 .screen {
   position: absolute; inset: 0;
   display: none;
@@ -229,6 +226,10 @@ html, body {
   background: #1A1D22; color: #FF6B6B; border: 1px solid #3A2626;
   padding: 14px; border-radius: 14px; font-weight: 700; font-size: 14px;
 }
+
+/* placed last so it wins over component padding shorthands that also set padding-top */
+.safe-top { padding-top: calc(10px + env(safe-area-inset-top)); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 </style>
 </head>
 <body>
@@ -638,7 +639,7 @@ const Store = {
   set(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {} }
 };
 
-const PREP_SECONDS = 3;
+const PREP_SECONDS = 8;
 
 let settings = Store.get('kb_settings', {
   rounds: 3, work: 50, rest: 20, soundOn: true, vibrationOn: true, wakeLockOn: true,
@@ -775,7 +776,9 @@ function ensureAudio() {
   if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 }
 function beep(freq = 880, dur = 0.12, type = 'sine', vol = 0.25) {
-  if (!settings.soundOn || !audioCtx) return;
+  if (!settings.soundOn) return;
+  ensureAudio();
+  if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = type; osc.frequency.value = freq;
@@ -892,9 +895,9 @@ function tick(first) {
     if (left !== session.remaining) {
       session.remaining = left;
       updateRing();
-      if (left > 0 && left <= 3) beep(600, 0.1, 'square', 0.2);
+      if (left > 0 && left <= 3) beep(600, 0.12, 'square', 0.4);
       if (left === 0) {
-        beep(1000, 0.18, 'sine', 0.3);
+        beep(1000, 0.2, 'sine', 0.5);
         vibrate(150);
         advanceStep();
       }
@@ -918,6 +921,7 @@ function pauseToggle() {
   if (session.paused) {
     clearInterval(session.timerHandle);
   } else {
+    ensureAudio();
     session.endsAt = Date.now() + session.remaining * 1000;
     tick();
   }
