@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Гиря 16</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Гиря 16">
+<meta name="theme-color" content="#0B0D10">
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  background: #0B0D10;
+  color: #F4F5F7;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  overscroll-behavior: none;
+  user-select: none;
+}
+#app { height: 100vh; height: 100dvh; position: relative; overflow: hidden; }
+
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+.screen {
+  position: absolute; inset: 0;
+  display: none;
+  flex-direction: column;
+  overflow-y: auto;
+  background: #0B0D10;
+}
+.screen.active { display: flex; }
+
+/* ===== HOME ===== */
+.home-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 18px 20px 4px;
+}
+.eyebrow { font-size: 13px; color: #8A8F98; text-transform: capitalize; }
+#home-title { margin: 2px 0 0; font-size: 28px; font-weight: 700; }
+.icon-btn {
+  background: #1A1D22; border: none; color: #F4F5F7;
+  width: 40px; height: 40px; border-radius: 12px; font-size: 18px;
+}
+.day-pill {
+  margin: 10px 20px 0; padding: 10px 14px; background: #15181D;
+  border: 1px solid #23262C; border-radius: 14px; font-size: 14px; color: #C9CDD4;
+  width: fit-content;
+}
+.streak-row { display: flex; gap: 10px; padding: 14px 20px 4px; }
+.streak-chip {
+  background: #15181D; border: 1px solid #23262C; border-radius: 12px;
+  padding: 8px 12px; font-size: 13px; color: #C9CDD4;
+}
+.cards { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+.card {
+  text-align: left; border: none; border-radius: 22px; padding: 20px;
+  color: #0B0D10; cursor: pointer; position: relative;
+}
+.card-warmup { background: linear-gradient(135deg, #7CF0C2, #3ED598); }
+.card-workout { background: linear-gradient(135deg, #FFB45C, #FF7A4D); }
+.card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.card-emoji { font-size: 30px; }
+.card-arrow { font-size: 26px; opacity: 0.6; }
+.card-title { font-size: 22px; font-weight: 800; }
+.card-sub { font-size: 14px; opacity: 0.75; margin-top: 4px; font-weight: 600; }
+.card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.card-tags span {
+  background: rgba(11,13,16,0.18); padding: 4px 10px; border-radius: 10px;
+  font-size: 12px; font-weight: 700;
+}
+.profile-strip {
+  display: flex; justify-content: space-between; padding: 10px 20px 18px;
+  gap: 8px;
+}
+.profile-item {
+  flex: 1; background: #15181D; border: 1px solid #23262C; border-radius: 12px;
+  padding: 8px 6px; text-align: center;
+}
+.profile-item span { display: block; font-size: 10px; color: #8A8F98; }
+.profile-item b { font-size: 12px; }
+
+/* ===== PLAYER ===== */
+.player-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; }
+.player-progress { flex: 1; height: 5px; background: #1A1D22; border-radius: 3px; overflow: hidden; }
+.player-progress-fill { height: 100%; width: 0%; background: #3ED598; transition: width .3s; }
+.player-round { font-size: 13px; color: #8A8F98; min-width: 36px; text-align: right; }
+.settings-title { font-weight: 700; flex: 1; text-align: center; }
+
+.player-body { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 24px; overflow-y: auto; }
+.phase-badge {
+  background: #1A1D22; color: #3ED598; font-weight: 800; letter-spacing: 1px;
+  font-size: 13px; padding: 6px 14px; border-radius: 20px; margin-bottom: 10px;
+}
+.phase-badge.rest { color: #5CA7FF; }
+.phase-badge.prep { color: #FFD166; }
+
+.timer-wrap { position: relative; width: 220px; height: 220px; margin: 6px 0 10px; }
+.timer-ring { width: 220px; height: 220px; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: #1A1D22; stroke-width: 10; }
+.ring-fg {
+  fill: none; stroke: #3ED598; stroke-width: 10; stroke-linecap: round;
+  stroke-dasharray: 628; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear, stroke .3s;
+}
+.timer-center {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.timer-anim { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 2px; }
+.timer-seconds { font-size: 44px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* ===== Фигура-силуэт ===== */
+.fig-svg { width: 92px; height: 122px; display: block; overflow: visible; }
+.fig-part { stroke: #F4F5F7; stroke-width: 7; stroke-linecap: round; fill: none; }
+.fig-head { fill: #F4F5F7; }
+.fig-kb-ball { fill: #FFB45C; }
+.fig-kb-handle { fill: none; stroke: #FFB45C; stroke-width: 3; }
+.legL, .legR, .armL, .armR, .upperBody { transform-origin: 0 0; }
+
+.ex-name { font-size: 24px; font-weight: 800; text-align: center; margin: 4px 0 2px; }
+.ex-muscle { color: #8A8F98; font-size: 14px; margin-bottom: 14px; }
+.ex-card {
+  background: #15181D; border: 1px solid #23262C; border-radius: 16px;
+  padding: 14px 16px; width: 100%; max-width: 420px; font-size: 14px; line-height: 1.5;
+  color: #C9CDD4;
+}
+.ex-card-row { margin-bottom: 8px; }
+.ex-card-row:last-child { margin-bottom: 0; }
+.ex-card-row b { color: #F4F5F7; }
+.ex-mistake b { color: #FF8A65; }
+.next-up { margin-top: 12px; font-size: 13px; color: #8A8F98; text-align: center; }
+
+.player-controls { display: flex; justify-content: center; align-items: center; gap: 22px; padding: 14px 20px 22px; }
+.ctrl-btn {
+  background: #1A1D22; border: none; color: #F4F5F7; width: 54px; height: 54px;
+  border-radius: 50%; font-size: 18px;
+}
+.ctrl-main { width: 72px; height: 72px; font-size: 26px; background: #3ED598; color: #0B0D10; }
+
+/* ===== Анимации категорий (на частях фигуры) ===== */
+@keyframes swingUp { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(175deg);} }
+@keyframes hingeLean { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(-35deg);} }
+@keyframes squatDip { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(14px);} }
+@keyframes legOutL { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(-8deg);} }
+@keyframes legOutR { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(8deg);} }
+@keyframes rowPull { 0%,100%{ transform: rotate(10deg);} 50%{ transform: rotate(-70deg);} }
+@keyframes curlUp { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(140deg);} }
+@keyframes coreTwist { 0%,100%{ transform: rotate(-12deg);} 50%{ transform: rotate(12deg);} }
+@keyframes lungeL { 0%,100%{ transform: rotate(18deg);} 50%{ transform: rotate(-18deg);} }
+@keyframes lungeR { 0%,100%{ transform: rotate(-18deg);} 50%{ transform: rotate(18deg);} }
+@keyframes mobilitySpin { from{ transform: rotate(0deg);} to{ transform: rotate(360deg);} }
+@keyframes stretchPulse { 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.05);} }
+@keyframes stretchReach { 0%,100%{ transform: rotate(60deg);} 50%{ transform: rotate(120deg);} }
+
+.anim-press .armL, .anim-press .armR { animation: swingUp 1s ease-in-out infinite; }
+.anim-hinge .upperBody { animation: hingeLean 1.1s ease-in-out infinite; }
+.anim-squat #figAll { animation: squatDip 1.1s ease-in-out infinite; }
+.anim-squat .legL { animation: legOutL 1.1s ease-in-out infinite; }
+.anim-squat .legR { animation: legOutR 1.1s ease-in-out infinite; }
+.anim-row .armL, .anim-row .armR { animation: rowPull 1s ease-in-out infinite; }
+.anim-curl .armR { animation: curlUp .9s ease-in-out infinite; }
+.anim-core .upperBody { animation: coreTwist .9s ease-in-out infinite; }
+.anim-lunge .legL { animation: lungeL 1.1s ease-in-out infinite; }
+.anim-lunge .legR { animation: lungeR 1.1s ease-in-out infinite; }
+.anim-mobility .armL, .anim-mobility .armR { animation: mobilitySpin 1.8s linear infinite; }
+.anim-stretch #figAll { animation: stretchPulse 2.4s ease-in-out infinite; }
+.anim-stretch .armR { animation: stretchReach 2.4s ease-in-out infinite; }
+.anim-power #figAll { animation: squatDip .7s ease-in-out infinite; }
+.anim-power .armL, .anim-power .armR { animation: swingUp .7s ease-in-out infinite; }
+
+/* ===== DONE ===== */
+.done-wrap {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 20px;
+}
+.done-emoji { font-size: 64px; margin-bottom: 10px; }
+.done-wrap h1 { margin: 0 0 6px; }
+.done-wrap p { color: #8A8F98; margin: 0 0 20px; }
+.done-stats { display: flex; gap: 14px; margin-bottom: 30px; }
+.done-stat {
+  background: #15181D; border: 1px solid #23262C; border-radius: 16px;
+  padding: 16px 24px; display: flex; flex-direction: column; align-items: center;
+}
+.done-stat b { font-size: 24px; }
+.done-stat span { font-size: 12px; color: #8A8F98; margin-top: 4px; }
+.primary-btn {
+  background: #3ED598; color: #0B0D10; border: none; font-weight: 800;
+  font-size: 16px; padding: 16px 40px; border-radius: 16px; width: 100%; max-width: 320px;
+}
+
+/* ===== SETTINGS ===== */
+.settings-body { padding: 10px 20px 30px; display: flex; flex-direction: column; gap: 22px; }
+.settings-group {
+  background: #15181D; border: 1px solid #23262C; border-radius: 16px; padding: 16px;
+}
+.settings-label { font-weight: 700; margin-bottom: 10px; font-size: 14px; }
+.settings-hint { font-size: 12px; color: #8A8F98; margin-top: 8px; line-height: 1.5; }
+.daypick-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.daypick-btn {
+  background: #1A1D22; border: 1px solid #23262C; color: #F4F5F7; font-size: 13px;
+  padding: 8px 12px; border-radius: 12px;
+}
+.daypick-btn.active { background: #3ED598; color: #0B0D10; border-color: #3ED598; font-weight: 700; }
+.stepper { display: flex; align-items: center; gap: 16px; justify-content: center; }
+.stepper-pair { display: flex; justify-content: space-around; }
+.stepper-btn {
+  background: #1A1D22; border: none; color: #F4F5F7; width: 36px; height: 36px;
+  border-radius: 10px; font-size: 18px;
+}
+.stepper span { font-size: 16px; font-weight: 700; min-width: 24px; text-align: center; }
+.settings-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; font-size: 14px;
+}
+.switch { position: relative; display: inline-block; width: 46px; height: 28px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer; inset: 0; background: #2A2D33;
+  border-radius: 20px; transition: .2s;
+}
+.slider::before {
+  content: ""; position: absolute; height: 22px; width: 22px; left: 3px; bottom: 3px;
+  background: white; border-radius: 50%; transition: .2s;
+}
+.switch input:checked + .slider { background: #3ED598; }
+.switch input:checked + .slider::before { transform: translateX(18px); }
+.danger-btn {
+  background: #1A1D22; color: #FF6B6B; border: 1px solid #3A2626;
+  padding: 14px; border-radius: 14px; font-weight: 700; font-size: 14px;
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== ГЛАВНЫЙ ЭКРАН ===== -->
+  <section id="screen-home" class="screen active">
+    <header class="home-header safe-top">
+      <div>
+        <div class="eyebrow" id="home-date"></div>
+        <h1 id="home-title">Привет!</h1>
+      </div>
+      <button class="icon-btn" id="btn-settings" aria-label="Настройки">⚙️</button>
+    </header>
+
+    <div class="day-pill" id="day-pill">День 1 из 7 · Плечи и грудь</div>
+
+    <div class="streak-row">
+      <div class="streak-chip">🔥 <span id="streak-count">0</span> дней подряд</div>
+      <div class="streak-chip">✅ <span id="total-count">0</span> тренировок всего</div>
+    </div>
+
+    <div class="cards">
+      <button class="card card-warmup" id="card-warmup">
+        <div class="card-top">
+          <span class="card-emoji">🧘</span>
+          <span class="card-arrow">›</span>
+        </div>
+        <div class="card-title">Разминка</div>
+        <div class="card-sub" id="warmup-sub">8 упражнений · ~5 мин</div>
+      </button>
+
+      <button class="card card-workout" id="card-workout">
+        <div class="card-top">
+          <span class="card-emoji" id="workout-emoji">💪</span>
+          <span class="card-arrow">›</span>
+        </div>
+        <div class="card-title" id="workout-title">Тренировка</div>
+        <div class="card-sub" id="workout-sub">6 упражнений · 3 круга</div>
+        <div class="card-tags" id="workout-tags"></div>
+      </button>
+    </div>
+
+    <div class="profile-strip safe-bottom">
+      <div class="profile-item"><span>Рост</span><b>180 см</b></div>
+      <div class="profile-item"><span>Вес</span><b>70 кг</b></div>
+      <div class="profile-item"><span>Гиря</span><b>16 кг</b></div>
+      <div class="profile-item"><span>Цель</span><b>Рельеф + плечи/грудь</b></div>
+    </div>
+  </section>
+
+  <!-- ===== ПЛЕЕР ТРЕНИРОВКИ ===== -->
+  <section id="screen-player" class="screen">
+    <header class="player-header safe-top">
+      <button class="icon-btn" id="btn-exit">✕</button>
+      <div class="player-progress"><div class="player-progress-fill" id="player-progress-fill"></div></div>
+      <div class="player-round" id="player-round">1/1</div>
+    </header>
+
+    <div class="player-body">
+      <div class="phase-badge" id="phase-badge">РАБОТА</div>
+      <div class="timer-wrap">
+        <svg class="timer-ring" viewBox="0 0 220 220">
+          <circle class="ring-bg" cx="110" cy="110" r="100"></circle>
+          <circle class="ring-fg" id="ring-fg" cx="110" cy="110" r="100"></circle>
+        </svg>
+        <div class="timer-center">
+          <div class="timer-anim" id="timer-anim">
+            <svg class="fig-svg" viewBox="0 0 100 150" aria-hidden="true">
+              <g id="figAll">
+                <g transform="translate(50,82)">
+                  <g class="legL"><line class="fig-part" x1="0" y1="0" x2="-16" y2="46"/></g>
+                  <g class="legR"><line class="fig-part" x1="0" y1="0" x2="16" y2="46"/></g>
+                  <g class="upperBody">
+                    <circle class="fig-head" cx="0" cy="-58" r="10"/>
+                    <line class="fig-part" x1="0" y1="-48" x2="0" y2="0"/>
+                    <g transform="translate(0,-48)">
+                      <g class="armL"><line class="fig-part" x1="0" y1="0" x2="-22" y2="34"/></g>
+                      <g class="armR">
+                        <line class="fig-part" x1="0" y1="0" x2="22" y2="34"/>
+                        <g transform="translate(22,34)">
+                          <rect class="fig-kb-handle" x="-4" y="-7" width="8" height="7" rx="3"/>
+                          <circle class="fig-kb-ball" cx="0" cy="4" r="8"/>
+                        </g>
+                      </g>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </svg>
+          </div>
+          <div class="timer-seconds" id="timer-seconds">30</div>
+        </div>
+      </div>
+
+      <h2 class="ex-name" id="ex-name">Упражнение</h2>
+      <div class="ex-muscle" id="ex-muscle">Мышцы</div>
+
+      <div class="ex-card">
+        <div class="ex-card-row"><b>Техника:</b> <span id="ex-instruction">—</span></div>
+        <div class="ex-card-row ex-mistake"><b>Ошибка:</b> <span id="ex-mistake">—</span></div>
+      </div>
+
+      <div class="next-up" id="next-up"></div>
+    </div>
+
+    <div class="player-controls safe-bottom">
+      <button class="ctrl-btn" id="btn-prev">⏮</button>
+      <button class="ctrl-btn ctrl-main" id="btn-pause">⏸</button>
+      <button class="ctrl-btn" id="btn-next">⏭</button>
+    </div>
+  </section>
+
+  <!-- ===== ЭКРАН ЗАВЕРШЕНИЯ ===== -->
+  <section id="screen-done" class="screen">
+    <div class="done-wrap safe-top safe-bottom">
+      <div class="done-emoji">🎉</div>
+      <h1>Готово!</h1>
+      <p id="done-text">Блок завершён.</p>
+      <div class="done-stats">
+        <div class="done-stat"><b id="done-time">0:00</b><span>Время</span></div>
+        <div class="done-stat"><b id="done-exercises">0</b><span>Упражнений</span></div>
+      </div>
+      <button class="primary-btn" id="btn-done-home">На главный</button>
+    </div>
+  </section>
+
+  <!-- ===== НАСТРОЙКИ ===== -->
+  <section id="screen-settings" class="screen">
+    <header class="player-header safe-top">
+      <button class="icon-btn" id="btn-settings-close">✕</button>
+      <div class="settings-title">Настройки</div>
+      <div style="width:40px"></div>
+    </header>
+    <div class="settings-body safe-bottom">
+
+      <div class="settings-group">
+        <div class="settings-label">Ручной выбор дня</div>
+        <div class="daypick-row" id="daypick-row"></div>
+        <div class="settings-hint">Приложение само ведёт 7-дневный цикл, но можно переключить день вручную.</div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-label">Количество кругов в тренировке</div>
+        <div class="stepper">
+          <button class="stepper-btn" id="rounds-minus">−</button>
+          <span id="rounds-value">3</span>
+          <button class="stepper-btn" id="rounds-plus">+</button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-label">Работа / отдых (сек)</div>
+        <div class="stepper-pair">
+          <div class="stepper">
+            <button class="stepper-btn" id="work-minus">−</button>
+            <span id="work-value">50</span>
+            <button class="stepper-btn" id="work-plus">+</button>
+          </div>
+          <div class="stepper">
+            <button class="stepper-btn" id="rest-minus">−</button>
+            <span id="rest-value">20</span>
+            <button class="stepper-btn" id="rest-plus">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-row">
+          <span>Звук</span>
+          <label class="switch"><input type="checkbox" id="toggle-sound" checked><span class="slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <span>Вибрация</span>
+          <label class="switch"><input type="checkbox" id="toggle-vibration" checked><span class="slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <span>Не гасить экран во время тренировки</span>
+          <label class="switch"><input type="checkbox" id="toggle-wakelock" checked><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-label">О тебе</div>
+        <div class="settings-hint">Рост 180 см · Вес 70 кг · Инвентарь: гиря 16 кг<br>Цель: снизить % жира, немного набрать массу, акцент на плечи и грудь.</div>
+      </div>
+
+      <button class="danger-btn" id="btn-reset">Сбросить прогресс</button>
+    </div>
+  </section>
+
+</div>
+<script>
+// ===== Данные программы =====
+// Категории движений для иконок/анимаций: press, hinge, squat, row, curl, core, lunge, mobility, stretch, power
+
+const PROFILE = {
+  height: 180,
+  weight: 70,
+  kettlebell: 16,
+  goal: "Снизить % жира, немного набрать массу, акцент на плечи и грудь"
+};
+
+function ex(id, name, cat, muscle, work, instruction, mistake) {
+  return { id, name, cat, muscle, work, instruction, mistake };
+}
+
+// ---------- РАЗМИНКА (каждый день, перед тренировкой) ----------
+const WARMUP = {
+  id: "warmup",
+  title: "Разминка",
+  subtitle: "Суставная разминка и разогрев",
+  rest: 12,
+  rounds: 1,
+  roundRest: 0,
+  items: [
+    ex("w1", "Вращения шеи", "mobility", "Шея", 35,
+      "Медленно вращай головой по кругу: 15 сек в одну сторону, 15 сек в другую.",
+      "Не запрокидывай голову резко назад, движение плавное."),
+    ex("w2", "Круги плечами", "mobility", "Плечи", 35,
+      "Большие круги плечами назад 15 сек, затем вперёд 15 сек, руки расслаблены вдоль тела.",
+      "Не поднимай плечи резко к ушам."),
+    ex("w3", "Мельница руками", "mobility", "Плечевые суставы", 35,
+      "Большие круги прямыми руками вперёд, затем назад — разгоняем плечевые суставы.",
+      "Руки держи прямыми, не сгибай сильно в локтях."),
+    ex("w4", "Скручивания корпуса стоя", "mobility", "Корпус / кор", 35,
+      "Ноги на ширине плеч, руки согнуты перед грудью, поворачивай корпус влево-вправо, таз смотрит вперёд.",
+      "Не крути только руками — работает именно корпус."),
+    ex("w5", "Круги тазом", "mobility", "Таз / поясница", 35,
+      "Руки на поясе, рисуй тазом большие круги: 15 сек в одну сторону, 15 сек в другую.",
+      "Колени мягкие, не фиксируй их."),
+    ex("w6", "Махи ногой вперёд-назад", "mobility", "Бёдра / тазобедренный сустав", 45,
+      "Держись за опору, маши прямой ногой вперёд-назад. Смена ноги на 20-й секунде.",
+      "Корпус держи ровно, не раскачивайся."),
+    ex("w7", "Воздушные приседания", "squat", "Ноги", 40,
+      "В среднем темпе приседай до параллели бёдер с полом, спина прямая, колени по направлению носков.",
+      "Не заваливай колени внутрь."),
+    ex("w8", "Выпад с поворотом корпуса", "lunge", "Ноги / кор", 45,
+      "Шаг вперёд в выпад, разворачивай корпус к передней ноге, вернись и смени ногу (смена на 20-й сек).",
+      "Колено передней ноги не должно уходить далеко за носок.")
+  ]
+};
+
+// ---------- ДЕНЬ 1 — ПЛЕЧИ И ГРУДЬ (PUSH) ----------
+const DAY1 = {
+  id: "day1",
+  type: "push",
+  title: "Плечи и грудь",
+  subtitle: "Жимовой день · гиря 16 кг + вес тела",
+  focus: ["Плечи", "Грудь", "Трицепс"],
+  rounds: 3,
+  work: 40,
+  rest: 15,
+  roundRest: 90,
+  items: [
+    ex("d1-1", "Жим гири над головой", "press", "Плечи", 0,
+      "Гиря у плеча в стойке «рэк», выжимай вверх над головой, полностью выпрямляя руку, опускай под контролем. Меняй руку каждые ~20 сек.",
+      "Не прогибайся в пояснице — фиксируй корпус и пресс."),
+    ex("d1-2", "Отжимания от пола", "press", "Грудь / плечи / трицепс", 0,
+      "Ладони чуть шире плеч, тело — прямая линия от макушки до пяток, опускайся грудью почти до пола.",
+      "Таз не должен провисать или задираться вверх. Тяжело — отжимайся с колен."),
+    ex("d1-3", "Жим гири лёжа (флор-пресс)", "press", "Грудь", 0,
+      "Лёжа на спине, гиря у груди в «рэке», выжимай вверх с разворотом кисти, опускай локоть к полу под контролем.",
+      "Опускай локоть медленно, не ударяй им пол."),
+    ex("d1-4", "Жим Арнольда", "press", "Плечи (все пучки)", 0,
+      "Гиря у груди ладонью к себе, выжимай вверх с разворотом кисти наружу — в верхней точке ладонь смотрит вперёд.",
+      "Разворот делай плавно, без рывка в плече."),
+    ex("d1-5", "Пайк-отжимания", "press", "Передние дельты", 0,
+      "Встань в позу «горка» (таз вверх, упор на руки и стопы), сгибай руки, опуская макушку к полу между ладонями.",
+      "Не сгибай сильно колени — акцент именно на плечи."),
+    ex("d1-6", "Французский жим из-за головы", "press", "Трицепс", 0,
+      "Держи гирю двумя руками за «рога» над головой, сгибай руки, опуская гирю за голову, затем выпрямляй вверх.",
+      "Локти смотрят вперёд и не расходятся в стороны.")
+  ]
+};
+
+// ---------- ДЕНЬ 2 — СПИНА И НОГИ (PULL + LEGS) ----------
+const DAY2 = {
+  id: "day2",
+  type: "pull_legs",
+  title: "Спина и ноги",
+  subtitle: "Тяговый день · гиря 16 кг",
+  focus: ["Спина", "Ягодицы", "Ноги", "Бицепс"],
+  rounds: 3,
+  work: 40,
+  rest: 15,
+  roundRest: 90,
+  items: [
+    ex("d2-1", "Махи гирей (свинг)", "hinge", "Ягодицы / задняя поверхность бедра", 0,
+      "Гиря перед собой двумя руками, отведи таз назад, затем резко разгибай бёдра — гиря летит вперёд-вверх до уровня груди.",
+      "Это не присед — работает тазобедренный сустав, спина остаётся прямой."),
+    ex("d2-2", "Тяга гири в наклоне", "row", "Спина", 0,
+      "Наклон корпуса ~45°, спина прямая, тяни гирю к поясу, сводя лопатку, меняй руку.",
+      "Не круглить спину, взгляд вперёд-вниз."),
+    ex("d2-3", "Присед с гирей у груди (гоблет)", "squat", "Ноги / ягодицы", 0,
+      "Держи гирю у груди двумя руками за «рога», приседай глубоко между коленей, спина прямая.",
+      "Пятки не отрываются от пола."),
+    ex("d2-4", "Подъём гири на бицепс", "curl", "Бицепс", 0,
+      "Стоя, гиря в одной руке, локоть прижат к корпусу, сгибай руку в локте.",
+      "Не раскачивай корпус, чтобы закинуть гирю."),
+    ex("d2-5", "Выпады с гирей", "lunge", "Ноги / ягодицы", 0,
+      "Гиря у груди или по бокам, шагай вперёд в выпад попеременно каждой ногой.",
+      "Колено не выходит далеко за носок, корпус держи вертикально."),
+    ex("d2-6", "Становая тяга на одной ноге", "hinge", "Задняя поверхность бедра / баланс", 0,
+      "Гиря в одной руке, наклоняйся вперёд, отводя свободную ногу назад для баланса, спина прямая.",
+      "Таз и плечи держи параллельно полу, не заваливайся.")
+  ]
+};
+
+// ---------- ДЕНЬ 3 — ФУЛЛБОДИ + КОР + КАРДИО ----------
+const DAY3 = {
+  id: "day3",
+  type: "full_core",
+  title: "Фулбоди + кор",
+  subtitle: "Взрывной день · гиря 16 кг",
+  focus: ["Всё тело", "Кор", "Кардио"],
+  rounds: 3,
+  work: 35,
+  rest: 15,
+  roundRest: 90,
+  items: [
+    ex("d3-1", "Рывок гири (снэтч)", "power", "Всё тело", 0,
+      "Из свинга резко протяни гирю вдоль тела и «пробей» кисть под неё, зафиксировав над головой. Начни в медленном темпе.",
+      "Контролируй гирю в верхней точке — рука полностью прямая."),
+    ex("d3-2", "Дровосек (woodchopper)", "core", "Косые мышцы живота", 0,
+      "Держи гирю двумя руками, веди по диагонали от бедра к противоположному плечу, разворачивая корпус.",
+      "Движение идёт от корпуса, а не только от рук."),
+    ex("d3-3", "Гало (halo)", "mobility", "Плечи / кор", 0,
+      "Держи гирю за «рога» у груди, медленно обводи ей вокруг головы по кругу, затем смени направление.",
+      "Держи корпус неподвижным, работают только руки и плечи."),
+    ex("d3-4", "Русские скручивания с гирей", "core", "Пресс / косые мышцы", 0,
+      "Сидя, корпус отклонён назад ~45°, поворачивай корпус влево-вправо, гиря у груди.",
+      "Спина прямая, не горбись."),
+    ex("d3-5", "Чистка гири (клин)", "power", "Всё тело", 0,
+      "Из свинга подтяни гирю к плечу, «поймав» её в стойку рэк локтем к корпусу, без удара по предплечью.",
+      "Гиря должна «обогнуть» руку мягко, а не удариться об неё."),
+    ex("d3-6", "Планка с протягиванием гири", "core", "Кор / плечи (статика)", 0,
+      "В упоре на прямых руках, гиря сбоку, перетягивай её под собой на другую сторону.",
+      "Таз держи неподвижным, не раскачивай его.")
+  ]
+};
+
+// ---------- ДЕНЬ 7 — ВОССТАНОВЛЕНИЕ (только разминка + растяжка) ----------
+const RECOVERY = {
+  id: "recovery",
+  type: "recovery",
+  title: "Восстановление",
+  subtitle: "Лёгкая мобилити и растяжка, без нагрузки",
+  focus: ["Восстановление"],
+  rounds: 1,
+  work: 40,
+  rest: 15,
+  roundRest: 0,
+  items: [
+    ex("r1", "Растяжка груди в проёме двери", "stretch", "Грудь", 40,
+      "Обопрись предплечьем о дверной косяк на уровне плеча, мягко шагни вперёд, растягивая грудь.",
+      "Не задерживай дыхание, тянись плавно без боли."),
+    ex("r2", "Растяжка плеча (рука поперёк груди)", "stretch", "Плечи", 40,
+      "Вытяни руку поперёк груди, второй рукой мягко прижимай её ближе к себе.",
+      "Плечо должно быть расслаблено, не поднимай его."),
+    ex("r3", "Растяжка трицепса за головой", "stretch", "Трицепс", 40,
+      "Заведи руку за голову, локоть вверх, второй рукой аккуратно надави на локоть.",
+      "Держи корпус прямо, не прогибайся в пояснице."),
+    ex("r4", "Растяжка задней поверхности бедра", "stretch", "Задняя поверхность бедра", 40,
+      "Наклонись к прямой ноге, поставленной на опору или вперёд, спина прямая.",
+      "Тянись от таза, а не скругляя спину."),
+    ex("r5", "Растяжка сгибателей бедра", "stretch", "Передняя поверхность бедра", 40,
+      "Встань в глубокий выпад, таз подай вперёд-вниз, почувствуй растяжение передней поверхности бедра сзади стоящей ноги.",
+      "Колено передней ноги не выходит за носок."),
+    ex("r6", "Поза ребёнка", "stretch", "Спина / поясница", 40,
+      "Сядь на пятки, вытяни руки вперёд, опусти грудь к коленям, расслабься.",
+      "Дыши медленно и глубоко."),
+    ex("r7", "Кошка-корова", "mobility", "Позвоночник", 40,
+      "На четвереньках чередуй прогиб в пояснице (корова) и округление спины (кошка) в такт дыханию.",
+      "Движение плавное, синхронизируй с дыханием."),
+    ex("r8", "Растяжка квадрицепса стоя", "stretch", "Квадрицепс", 40,
+      "Стоя, согни ногу в колене и подтяни стопу к ягодице, держась за опору.",
+      "Колени держи рядом, таз не подавай вперёд сильно.")
+  ]
+};
+
+const WORKOUT_DAYS = [DAY1, DAY2, DAY3]; // повторяются по кругу, 7-й день — RECOVERY
+
+const CATEGORY_LABELS = {
+  press: "Жим", hinge: "Тяга таза", squat: "Присед", row: "Тяга",
+  curl: "Сгибание", core: "Кор", lunge: "Выпад", mobility: "Мобилити",
+  stretch: "Растяжка", power: "Взрывное"
+};
+
+// ===== Утилиты =====
+const $ = (id) => document.getElementById(id);
+const todayStr = (d = new Date()) => {
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+};
+const fmtTime = (totalSec) => {
+  const m = Math.floor(totalSec/60), s = totalSec%60;
+  return `${m}:${String(s).padStart(2,'0')}`;
+};
+
+// ===== Хранилище =====
+const Store = {
+  get(key, fallback) {
+    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+    catch(e) { return fallback; }
+  },
+  set(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {} }
+};
+
+const PREP_SECONDS = 3;
+
+let settings = Store.get('kb_settings', {
+  rounds: 3, work: 50, rest: 20, soundOn: true, vibrationOn: true, wakeLockOn: true,
+  dayOverride: null // { date: 'YYYY-MM-DD', idx: 1-7 }
+});
+let progress = Store.get('kb_progress', {
+  startDate: todayStr(), completedDates: []
+});
+if (!progress.startDate) { progress.startDate = todayStr(); Store.set('kb_progress', progress); }
+
+function saveSettings() { Store.set('kb_settings', settings); }
+function saveProgress() { Store.set('kb_progress', progress); }
+
+// ===== Цикл дней =====
+function cycleIndexToday() {
+  if (settings.dayOverride && settings.dayOverride.date === todayStr()) return settings.dayOverride.idx;
+  const start = new Date(progress.startDate + 'T00:00:00');
+  const now = new Date(todayStr() + 'T00:00:00');
+  const days = Math.round((now - start) / 86400000);
+  return ((days % 7) + 7) % 7 + 1; // 1..7
+}
+function blockForIndex(idx) {
+  if (idx === 7) return RECOVERY;
+  return WORKOUT_DAYS[(idx - 1) % 3];
+}
+
+function computeStreak() {
+  const set = new Set(progress.completedDates);
+  let d = new Date();
+  // если сегодня ещё не отмечено, считаем цепочку начиная со вчера
+  if (!set.has(todayStr(d))) d.setDate(d.getDate() - 1);
+  let streak = 0;
+  while (set.has(todayStr(d))) { streak++; d.setDate(d.getDate() - 1); }
+  return streak;
+}
+
+// ===== Навигация между экранами =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+// ===== Главный экран =====
+function renderHome() {
+  const idx = cycleIndexToday();
+  const block = blockForIndex(idx);
+  const isRecovery = block.id === 'recovery';
+
+  $('home-date').textContent = new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+  $('home-title').textContent = isRecovery ? 'Сегодня — отдых 🌿' : 'Погнали 💪';
+  $('day-pill').textContent = `День ${idx} из 7 · ${block.title}`;
+
+  $('streak-count').textContent = computeStreak();
+  $('total-count').textContent = progress.completedDates.length;
+
+  const warmupTotal = WARMUP.items.reduce((s, it) => s + it.work, 0) + WARMUP.items.length * PREP_SECONDS + (WARMUP.items.length - 1) * WARMUP.rest;
+  $('warmup-sub').textContent = `${WARMUP.items.length} упражнений · ~${Math.round(warmupTotal/60)} мин`;
+
+  $('workout-emoji').textContent = isRecovery ? '🧘‍♂️' : '💪';
+  $('workout-title').textContent = block.title;
+  if (isRecovery) {
+    const total = block.items.reduce((s, it) => s + it.work, 0) + block.items.length * PREP_SECONDS + (block.items.length - 1) * block.rest;
+    $('workout-sub').textContent = `${block.items.length} растяжек · ~${Math.round(total/60)} мин`;
+  } else {
+    const perRound = block.items.length * (PREP_SECONDS + settings.work + settings.rest) - settings.rest;
+    const total = perRound * settings.rounds + block.roundRest * (settings.rounds - 1);
+    $('workout-sub').textContent = `${block.items.length} упражнений · ${settings.rounds} круга · ~${Math.round(total/60)} мин`;
+  }
+  $('workout-tags').innerHTML = block.focus.map(f => `<span>${f}</span>`).join('');
+
+  $('card-workout').onclick = () => startSession(block, block.id === 'recovery' ? 'recovery' : 'workout');
+}
+
+$('card-warmup').onclick = () => startSession(WARMUP, 'warmup');
+$('btn-settings').onclick = () => { renderSettings(); showScreen('screen-settings'); };
+$('btn-settings-close').onclick = () => { renderHome(); showScreen('screen-home'); };
+
+// ===== Настройки =====
+const DAYPICK_OPTIONS = [
+  { label: 'Авто', idx: null },
+  { label: 'Плечи/грудь', idx: 1 },
+  { label: 'Спина/ноги', idx: 2 },
+  { label: 'Фулбоди+кор', idx: 3 },
+  { label: 'Восстановление', idx: 7 },
+];
+
+function renderSettings() {
+  $('rounds-value').textContent = settings.rounds;
+  $('work-value').textContent = settings.work;
+  $('rest-value').textContent = settings.rest;
+  $('toggle-sound').checked = settings.soundOn;
+  $('toggle-vibration').checked = settings.vibrationOn;
+  $('toggle-wakelock').checked = settings.wakeLockOn;
+
+  const activeIdx = (settings.dayOverride && settings.dayOverride.date === todayStr()) ? settings.dayOverride.idx : null;
+  $('daypick-row').innerHTML = DAYPICK_OPTIONS.map(o =>
+    `<button class="daypick-btn ${activeIdx === o.idx ? 'active' : ''}" data-idx="${o.idx}">${o.label}</button>`
+  ).join('');
+  $('daypick-row').querySelectorAll('.daypick-btn').forEach(btn => {
+    btn.onclick = () => {
+      const raw = btn.dataset.idx;
+      settings.dayOverride = raw === 'null' ? null : { date: todayStr(), idx: Number(raw) };
+      saveSettings();
+      renderSettings();
+    };
+  });
+}
+
+$('rounds-minus').onclick = () => { settings.rounds = Math.max(1, settings.rounds - 1); saveSettings(); renderSettings(); };
+$('rounds-plus').onclick = () => { settings.rounds = Math.min(6, settings.rounds + 1); saveSettings(); renderSettings(); };
+$('work-minus').onclick = () => { settings.work = Math.max(10, settings.work - 5); saveSettings(); renderSettings(); };
+$('work-plus').onclick = () => { settings.work = Math.min(90, settings.work + 5); saveSettings(); renderSettings(); };
+$('rest-minus').onclick = () => { settings.rest = Math.max(5, settings.rest - 5); saveSettings(); renderSettings(); };
+$('rest-plus').onclick = () => { settings.rest = Math.min(60, settings.rest + 5); saveSettings(); renderSettings(); };
+$('toggle-sound').onchange = (e) => { settings.soundOn = e.target.checked; saveSettings(); };
+$('toggle-vibration').onchange = (e) => { settings.vibrationOn = e.target.checked; saveSettings(); };
+$('toggle-wakelock').onchange = (e) => { settings.wakeLockOn = e.target.checked; saveSettings(); };
+$('btn-reset').onclick = () => {
+  if (confirm('Сбросить весь прогресс (streak, настройки)?')) {
+    localStorage.clear();
+    settings = Store.get('kb_settings', { rounds: 3, work: 50, rest: 20, soundOn: true, vibrationOn: true, wakeLockOn: true, dayOverride: null });
+    progress = Store.get('kb_progress', { startDate: todayStr(), completedDates: [] });
+    renderSettings(); renderHome();
+  }
+};
+
+// ===== Звук =====
+let audioCtx = null;
+function ensureAudio() {
+  if (!audioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (Ctx) audioCtx = new Ctx();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+function beep(freq = 880, dur = 0.12, type = 'sine', vol = 0.25) {
+  if (!settings.soundOn || !audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type; osc.frequency.value = freq;
+  gain.gain.value = vol;
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start();
+  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+  osc.stop(audioCtx.currentTime + dur + 0.02);
+}
+function vibrate(pattern) {
+  if (settings.vibrationOn && navigator.vibrate) navigator.vibrate(pattern);
+}
+
+// ===== Wake Lock =====
+let wakeLock = null;
+async function requestWakeLock() {
+  if (!settings.wakeLockOn || !('wakeLock' in navigator)) return;
+  try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { /* no-op */ }
+}
+function releaseWakeLock() { if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; } }
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && session && !session.paused) requestWakeLock();
+});
+
+// ===== Построение последовательности шагов =====
+function buildSteps(block, mode) {
+  const steps = [];
+  if (mode === 'workout') {
+    for (let r = 1; r <= settings.rounds; r++) {
+      block.items.forEach((item, i) => {
+        steps.push({ phase: 'prep', item, duration: PREP_SECONDS, round: r });
+        steps.push({ phase: 'work', item, duration: settings.work, round: r });
+        if (i < block.items.length - 1) steps.push({ phase: 'rest', item: null, duration: settings.rest, round: r, next: block.items[i+1] });
+      });
+      if (r < settings.rounds) steps.push({ phase: 'rest', item: null, duration: block.roundRest, round: r, roundBreak: true, next: block.items[0] });
+    }
+  } else {
+    block.items.forEach((item, i) => {
+      steps.push({ phase: 'prep', item, duration: PREP_SECONDS, round: 1 });
+      steps.push({ phase: 'work', item, duration: item.work, round: 1 });
+      if (i < block.items.length - 1) steps.push({ phase: 'rest', item: null, duration: block.rest, round: 1, next: block.items[i+1] });
+    });
+  }
+  return steps;
+}
+
+// ===== Сессия (плеер) =====
+let session = null; // { block, mode, steps, idx, remaining, endsAt, timerHandle, paused }
+
+function startSession(block, mode) {
+  ensureAudio();
+  const steps = buildSteps(block, mode);
+  session = { block, mode, steps, idx: 0, remaining: steps[0].duration, paused: false, timerHandle: null, startedAt: Date.now() };
+  showScreen('screen-player');
+  renderStep();
+  tick(true);
+  requestWakeLock();
+}
+
+function totalRounds() {
+  if (session.mode !== 'workout') return 1;
+  return settings.rounds;
+}
+
+function renderStep() {
+  const step = session.steps[session.idx];
+  const phase = step.phase; // 'prep' | 'work' | 'rest'
+  const isRest = phase === 'rest';
+  const isPrep = phase === 'prep';
+
+  $('phase-badge').textContent = isPrep ? 'ПРИГОТОВЬСЯ' : isRest ? (step.roundBreak ? 'ОТДЫХ МЕЖДУ КРУГАМИ' : 'ОТДЫХ') : 'РАБОТА';
+  $('phase-badge').className = 'phase-badge' + (isRest ? ' rest' : isPrep ? ' prep' : '');
+  $('ring-fg').style.stroke = isRest ? '#5CA7FF' : isPrep ? '#FFD166' : '#3ED598';
+
+  if (isRest) {
+    const display = step.next;
+    $('ex-name').textContent = `Дальше: ${display ? display.name : 'Финиш'}`;
+    $('ex-muscle').textContent = 'Отдышись, попей воды';
+    $('ex-instruction').textContent = step.roundBreak ? 'Большой перерыв между кругами.' : 'Короткая пауза перед следующим упражнением.';
+    $('ex-mistake').textContent = 'Дыши ровно, встряхни руки.';
+    $('timer-anim').className = 'timer-anim';
+  } else {
+    $('ex-name').textContent = step.item.name;
+    $('ex-muscle').textContent = step.item.muscle;
+    $('ex-instruction').textContent = step.item.instruction;
+    $('ex-mistake').textContent = step.item.mistake;
+    $('timer-anim').className = 'timer-anim anim-' + step.item.cat;
+  }
+
+  $('player-round').textContent = session.mode === 'workout' ? `${step.round}/${totalRounds()}` : `${session.idx+1}/${session.steps.length}`;
+  $('player-progress-fill').style.width = `${Math.round(((session.idx) / session.steps.length) * 100)}%`;
+
+  const nextStep = session.steps[session.idx + 1];
+  $('next-up').textContent = nextStep ? ((nextStep.phase === 'work' || nextStep.phase === 'prep') ? `Далее: ${nextStep.item.name}` : 'Далее: отдых') : 'Это последний шаг 🎉';
+
+  session.remaining = step.duration;
+  updateRing();
+}
+
+function updateRing() {
+  $('timer-seconds').textContent = session.remaining;
+  const step = session.steps[session.idx];
+  const frac = step.duration ? session.remaining / step.duration : 0;
+  const circumference = 628;
+  $('ring-fg').style.strokeDashoffset = String(circumference * (1 - frac));
+}
+
+function tick(first) {
+  clearInterval(session.timerHandle);
+  session.endsAt = Date.now() + session.remaining * 1000;
+  session.timerHandle = setInterval(() => {
+    if (session.paused) return;
+    const left = Math.max(0, Math.ceil((session.endsAt - Date.now()) / 1000));
+    if (left !== session.remaining) {
+      session.remaining = left;
+      updateRing();
+      if (left > 0 && left <= 3) beep(600, 0.1, 'square', 0.2);
+      if (left === 0) {
+        beep(1000, 0.18, 'sine', 0.3);
+        vibrate(150);
+        advanceStep();
+      }
+    }
+  }, 200);
+}
+
+function advanceStep() {
+  if (session.idx < session.steps.length - 1) {
+    session.idx++;
+    renderStep();
+    tick();
+  } else {
+    finishSession();
+  }
+}
+
+function pauseToggle() {
+  session.paused = !session.paused;
+  $('btn-pause').textContent = session.paused ? '▶' : '⏸';
+  if (session.paused) {
+    clearInterval(session.timerHandle);
+  } else {
+    session.endsAt = Date.now() + session.remaining * 1000;
+    tick();
+  }
+}
+
+function jump(delta) {
+  const newIdx = Math.min(session.steps.length - 1, Math.max(0, session.idx + delta));
+  session.idx = newIdx;
+  renderStep();
+  if (!session.paused) tick();
+}
+
+function finishSession() {
+  clearInterval(session.timerHandle);
+  releaseWakeLock();
+  const elapsed = Math.round((Date.now() - session.startedAt) / 1000);
+  const exCount = session.mode === 'workout'
+    ? session.block.items.length * settings.rounds
+    : session.block.items.length;
+
+  if (session.mode === 'workout') {
+    if (!progress.completedDates.includes(todayStr())) {
+      progress.completedDates.push(todayStr());
+      saveProgress();
+    }
+  }
+
+  $('done-text').textContent = session.mode === 'warmup' ? 'Разминка завершена, отличная подготовка.' :
+    session.mode === 'recovery' ? 'Восстановление завершено, тело скажет спасибо.' :
+    'Тренировка завершена. Так держать!';
+  $('done-time').textContent = fmtTime(elapsed);
+  $('done-exercises').textContent = exCount;
+  showScreen('screen-done');
+}
+
+$('btn-pause').onclick = pauseToggle;
+$('btn-next').onclick = () => jump(1);
+$('btn-prev').onclick = () => jump(-1);
+$('btn-exit').onclick = () => {
+  if (confirm('Выйти из тренировки? Прогресс этого блока не сохранится.')) {
+    clearInterval(session.timerHandle);
+    releaseWakeLock();
+    renderHome();
+    showScreen('screen-home');
+  }
+};
+$('btn-done-home').onclick = () => { renderHome(); showScreen('screen-home'); };
+
+// ===== Инициализация =====
+renderHome();
+showScreen('screen-home');
+</script>
+</body>
+</html>
